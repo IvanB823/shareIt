@@ -1,7 +1,9 @@
 package ru.practicum.shareit.item.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.ItemNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
@@ -9,8 +11,10 @@ import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.ArrayList;
@@ -21,45 +25,36 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
 
-    private final Map<Long, Item> items = new HashMap<>();
-    private final AtomicLong idGenerator = new AtomicLong(1);
-
-    @Autowired
-    private UserService userService;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public ItemDto createItem(Long userId, ItemDto itemDto) {
         validateItemForCreation(itemDto, userId);
 
-        User owner;
-        try {
-            owner = UserMapper.toUser(userService.getUserById(userId));
-        } catch (IllegalArgumentException e) {
-            throw new UserNotFoundException("Собственник не найден");
-        }
+        User owner = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Собственник не найден"));
 
         Item item = ItemMapper.toItem(itemDto);
-        item.setId(idGenerator.getAndIncrement());
         item.setOwner(owner);
 
-        items.put(item.getId(), item);
-        return ItemMapper.toItemDto(item);
+        Item savedItem = itemRepository.save(item);
+        return ItemMapper.toItemDto(savedItem);
     }
 
     @Override
+    @Transactional
     public ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto) {
-        try {
-            userService.getUserById(userId);
-        } catch (IllegalArgumentException e) {
-            throw new UserNotFoundException("Собственник не найден");
-        }
+        userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Собственник не найден"));
 
-        Item existingItem = items.get(itemId);
-        if (existingItem == null) {
-            throw new ItemNotFoundException("Предмет не найден");
-        }
+        Item existingItem = itemRepository.findById(itemId)
+                .orElseThrow(() -> new ItemNotFoundException("Предмет не найден"));
 
         if (!existingItem.getOwner().getId().equals(userId)) {
             throw new AccessDeniedException("Только собственник может редактировать предмет");
@@ -83,7 +78,8 @@ public class ItemServiceImpl implements ItemService {
             existingItem.setAvailable(itemDto.getAvailable());
         }
 
-        return ItemMapper.toItemDto(existingItem);
+        Item updatedItem = itemRepository.save(existingItem);
+        return ItemMapper.toItemDto(updatedItem);
     }
 
     @Override
@@ -93,7 +89,7 @@ public class ItemServiceImpl implements ItemService {
             throw new ItemNotFoundException("Предмет не найден");
         }
 
-        return ItemMapper.toItemDto(item);
+        return toItemWithBookingDto(item, null, null, commentDtos);
     }
 
     @Override
