@@ -37,7 +37,7 @@ public class BookingServiceImpl implements BookingService {
         Item item = itemRepository.findById(bookingDto.getItemId())
                 .orElseThrow(() -> new ItemNotFoundException("Предмет c данным id не найден"));
 
-        if (!item.getAvailable()) {
+        if (!item.getIsAvailable()) {
             throw new RuntimeException("Предмет недоступен для бронирования");
         }
 

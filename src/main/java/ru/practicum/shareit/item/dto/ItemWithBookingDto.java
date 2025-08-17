@@ -6,6 +6,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.item.comment.CommentDto;
 
 import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
