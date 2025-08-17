@@ -11,9 +11,9 @@ import java.util.List;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByOwnerId(Long ownerId);
 
-    @Query(value = "SELECT i FROM items i " +
-            "WHERE i.is_available = true AND " +
+    @Query(value = "SELECT i FROM Item i " +
+            "WHERE i.isAvailable = true AND " +
             "(UPPER(i.name) LIKE UPPER(CONCAT('%', ?1, '%')) OR " +
-            "UPPER(i.description) LIKE UPPER(CONCAT('%', ?1, '%')))", nativeQuery = true)
+            "UPPER(i.description) LIKE UPPER(CONCAT('%', ?1, '%')))")
     List<Item> search(String text);
 }
