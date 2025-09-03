@@ -10,7 +10,7 @@ public class ItemMapper {
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
-                item.getAvailable()
+                item.getIsAvailable()
         );
     }
 
@@ -19,7 +19,7 @@ public class ItemMapper {
         item.setId(itemDto.getId());
         item.setName(itemDto.getName());
         item.setDescription(itemDto.getDescription());
-        item.setAvailable(itemDto.getAvailable());
+        item.setIsAvailable(itemDto.getAvailable());
 
         return item;
     }
