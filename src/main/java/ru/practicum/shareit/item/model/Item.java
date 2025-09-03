@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.model.User;
 
-
 @Entity
 @Table(name = "items")
 @Data
@@ -24,9 +23,12 @@ public class Item {
     private String description;
 
     @Column(name = "is_available", nullable = false)
-    private Boolean isAvailable;
+    private Boolean available;
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
+
+    @Column(name = "request_id")
+    private Long requestId;
 }

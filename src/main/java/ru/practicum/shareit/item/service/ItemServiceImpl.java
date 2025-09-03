@@ -8,10 +8,7 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.status.BookingStatus;
-import ru.practicum.shareit.exception.AccessDeniedException;
-import ru.practicum.shareit.exception.ItemNotFoundException;
-import ru.practicum.shareit.exception.UserNotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.comment.CommentRepository;
@@ -22,6 +19,8 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,6 +37,7 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
     @Transactional
@@ -46,6 +46,12 @@ public class ItemServiceImpl implements ItemService {
 
         User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Собственник не найден"));
+
+        if (itemDto.getRequestId() != null) {
+            ItemRequest request = itemRequestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new RequestNotFoundException(
+                            "Запрос не найден"));
+        }
 
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(owner);
@@ -82,7 +88,11 @@ public class ItemServiceImpl implements ItemService {
         }
 
         if (itemDto.getAvailable() != null) {
-            existingItem.setIsAvailable(itemDto.getAvailable());
+            existingItem.setAvailable(itemDto.getAvailable());
+        }
+
+        if (itemDto.getRequestId() != null) {
+            existingItem.setRequestId(itemDto.getRequestId());
         }
 
         Item updatedItem = itemRepository.save(existingItem);
@@ -153,7 +163,6 @@ public class ItemServiceImpl implements ItemService {
             return new ArrayList<>();
         }
 
-        String searchText = text.toLowerCase();
         return itemRepository.search(text).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
@@ -212,7 +221,7 @@ public class ItemServiceImpl implements ItemService {
         dto.setId(item.getId());
         dto.setName(item.getName());
         dto.setDescription(item.getDescription());
-        dto.setAvailable(item.getIsAvailable());
+        dto.setAvailable(item.getAvailable());
         dto.setLastBooking(lastBooking);
         dto.setNextBooking(nextBooking);
         dto.setComments(comments);
