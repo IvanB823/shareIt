@@ -7,9 +7,8 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.validator.EmailValidator;
 
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,8 +21,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto createUser(UserDto userDto) {
-        validateUserData(userDto, true);
-
         if (userRepository.existsByEmail(userDto.getEmail())) {
             throw new IllegalArgumentException("Email уже существует");
         }
@@ -40,9 +37,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
 
         if (userDto.getEmail() != null && !userDto.getEmail().equals(existingUser.getEmail())) {
-            EmailValidator.validateEmail(userDto.getEmail());
             String normalizedEmail = userDto.getEmail().trim();
-
             if (userRepository.existsByEmailAndIdNot(normalizedEmail, userId)) {
                 throw new IllegalArgumentException("Пользователь с таким email уже существует");
             }
@@ -50,19 +45,17 @@ public class UserServiceImpl implements UserService {
         }
 
         if (userDto.getName() != null) {
-            if (userDto.getName().trim().isEmpty()) {
-                throw new IllegalArgumentException("Имя не может быть пустым");
-            }
             existingUser.setName(userDto.getName().trim());
         }
+
         User updatedUser = userRepository.save(existingUser);
-        return UserMapper.toUserDto(existingUser);
+        return UserMapper.toUserDto(updatedUser);
     }
 
     @Override
     public UserDto getUserById(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден!"));
+                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
         return UserMapper.toUserDto(user);
     }
 
@@ -76,25 +69,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUser(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new IllegalArgumentException("Пользователь не найден");
+        }
         userRepository.deleteById(userId);
-    }
-
-    private void validateUserData(UserDto userDto, boolean isCreation) {
-        if (userDto == null) {
-            throw new IllegalArgumentException("Пользователь не должен быть null");
-        }
-
-        if (isCreation || userDto.getName() != null) {
-            if (userDto.getName() == null || userDto.getName().trim().isEmpty()) {
-                throw new IllegalArgumentException("Имя не должно быть пустым или null");
-            }
-        }
-
-        if (isCreation || userDto.getEmail() != null) {
-            if (userDto.getEmail() == null || userDto.getEmail().trim().isEmpty()) {
-                throw new IllegalArgumentException("Email не должен быть пустым или null");
-            }
-            EmailValidator.validateEmail(userDto.getEmail());
-        }
     }
 }

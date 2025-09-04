@@ -1,5 +1,7 @@
 package ru.practicum.shareit.user.validator;
 
+import ru.practicum.shareit.exception.ValidationException;
+
 import java.util.regex.Pattern;
 
 public class EmailValidator {
@@ -17,11 +19,11 @@ public class EmailValidator {
 
     public static void validateEmail(String email) {
         if (email == null || email.trim().isEmpty()) {
-            throw new IllegalArgumentException("Email не должен быть пустым или null");
+            throw new ValidationException("Email не должен быть пустым или null");
         }
 
         if (!isValidEmail(email)) {
-            throw new IllegalArgumentException("Email имеет неверный формат формат");
+            throw new ValidationException("Email имеет неверный формат");
         }
     }
 }
