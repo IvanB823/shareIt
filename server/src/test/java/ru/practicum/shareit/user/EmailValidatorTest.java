@@ -110,7 +110,7 @@ class EmailValidatorTest {
                 ValidationException.class,
                 () -> EmailValidator.validateEmail(null)
         );
-        assertEquals("Email не может быть пустым или null", exception.getMessage());
+        assertEquals("Email не должен быть пустым или null", exception.getMessage());
     }
 
     @Test
@@ -119,7 +119,7 @@ class EmailValidatorTest {
                 ValidationException.class,
                 () -> EmailValidator.validateEmail("")
         );
-        assertEquals("Email не может быть пустым или null", exception.getMessage());
+        assertEquals("Email не должен быть пустым или null", exception.getMessage());
     }
 
     @Test
@@ -128,7 +128,7 @@ class EmailValidatorTest {
                 ValidationException.class,
                 () -> EmailValidator.validateEmail("   ")
         );
-        assertEquals("Email не может быть пустым или null", exception.getMessage());
+        assertEquals("Email не должен быть пустым или null", exception.getMessage());
     }
 
     @ParameterizedTest
@@ -148,7 +148,7 @@ class EmailValidatorTest {
                 ValidationException.class,
                 () -> EmailValidator.validateEmail(email)
         );
-        assertEquals("Email имеет невалидный формат", exception.getMessage());
+        assertEquals("Email имеет неверный формат", exception.getMessage());
     }
 
     @Test
@@ -168,7 +168,7 @@ class EmailValidatorTest {
                 ValidationException.class,
                 () -> EmailValidator.validateEmail("  invalid@  ")
         );
-        assertEquals("Email имеет невалидный формат", exception.getMessage());
+        assertEquals("Email имеет неверный формат", exception.getMessage());
     }
 
     // Тесты граничных случаев
