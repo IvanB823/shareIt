@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.status.BookingStatus;
 import java.util.List;
 
 public interface BookingService {
+
     BookingDto createBooking(Long userId, BookingCreateDto bookingDto);
 
     BookingDto updateBookingStatus(Long userId, Long bookingId, Boolean approved);
@@ -16,5 +17,4 @@ public interface BookingService {
     List<BookingDto> getBookingsByUser(Long userId, BookingStatus status);
 
     List<BookingDto> getBookingsByOwner(Long userId, BookingStatus status);
-
 }

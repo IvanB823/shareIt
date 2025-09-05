@@ -8,6 +8,7 @@ import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.status.BookingStatus;
 
 import java.util.List;
+
 import static ru.practicum.shareit.util.Constants.USER_ID_HEADER;
 
 @RestController
@@ -17,17 +18,17 @@ public class BookingController {
 
     private final BookingService bookingService;
 
+    @GetMapping
+    public List<BookingDto> getBookings(@RequestHeader(USER_ID_HEADER) long userId,
+                                        @RequestParam(name = "state", defaultValue = "ALL") String state) {
+        BookingStatus status = BookingStatus.valueOf(state.toUpperCase());
+        return bookingService.getBookingsByUser(userId, status);
+    }
+
     @PostMapping
     public BookingDto createBooking(@RequestHeader(USER_ID_HEADER) long userId,
                                     @RequestBody BookingCreateDto bookingDto) {
         return bookingService.createBooking(userId, bookingDto);
-    }
-
-    @PatchMapping("/{bookingId}")
-    public BookingDto updateBookingStatus(@RequestHeader(USER_ID_HEADER) long userId,
-                                          @PathVariable Long bookingId,
-                                          @RequestParam Boolean approved) {
-        return bookingService.updateBookingStatus(userId, bookingId, approved);
     }
 
     @GetMapping("/{bookingId}")
@@ -36,17 +37,17 @@ public class BookingController {
         return bookingService.getBookingById(userId, bookingId);
     }
 
-    @GetMapping
-    public List<BookingDto> getBookings(@RequestHeader(USER_ID_HEADER) long userId,
-                                        @RequestParam(name = "state", defaultValue = "ALL") String state) {
-        BookingStatus status = BookingStatus.valueOf(state.toUpperCase());
-        return bookingService.getBookingsByUser(userId, status);
-    }
-
     @GetMapping("/owner")
     public List<BookingDto> getBookingsByOwner(@RequestHeader(USER_ID_HEADER) long userId,
                                                @RequestParam(name = "state", defaultValue = "ALL") String state) {
         BookingStatus status = BookingStatus.valueOf(state.toUpperCase());
         return bookingService.getBookingsByOwner(userId, status);
+    }
+
+    @PatchMapping("/{bookingId}")
+    public BookingDto updateBookingStatus(@RequestHeader(USER_ID_HEADER) long userId,
+                                          @PathVariable Long bookingId,
+                                          @RequestParam Boolean approved) {
+        return bookingService.updateBookingStatus(userId, bookingId, approved);
     }
 }

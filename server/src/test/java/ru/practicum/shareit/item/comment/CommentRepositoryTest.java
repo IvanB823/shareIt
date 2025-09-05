@@ -52,6 +52,6 @@ public class CommentRepositoryTest {
         List<Comment> comments = commentRepository.findByItemId(item.getId());
 
         assertThat(comments).hasSize(1);
-        assertThat(comments.get(0).getText()).isEqualTo("Great item!");
+        assertThat(comments.getFirst().getText()).isEqualTo("Great item!");
     }
 }
